@@ -30,7 +30,7 @@ mapping = {
 }
 
 
-def main(hf_ckpt_path, save_path, n_experts, mp):
+def main(hf_ckpt_path, save_path, n_experts, mp, n_layers):
     """
     Converts and saves model checkpoint files into a specified format.
 
@@ -53,6 +53,10 @@ def main(hf_ckpt_path, save_path, n_experts, mp):
                 if "model.layers.61" in name:
                     continue
                 param: torch.Tensor = f.get_tensor(name)
+                if name.startswith("model.layers."):
+                    layer_idx = int(name.split(".")[2])
+                    if layer_idx >= n_layers:
+                        continue
                 if name.startswith("model."):
                     name = name[len("model."):]
                 name = name.replace("self_attn", "attn")
@@ -91,6 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("--save-path", type=str, required=True)
     parser.add_argument("--n-experts", type=int, required=True)
     parser.add_argument("--model-parallel", type=int, required=True)
+    parser.add_argument("--n-layers", type=int, required=True)
     args = parser.parse_args()
     assert args.n_experts % args.model_parallel == 0
-    main(args.hf_ckpt_path, args.save_path, args.n_experts, args.model_parallel)
+    main(args.hf_ckpt_path, args.save_path, args.n_experts, args.model_parallel, args.n_layers)

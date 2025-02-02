@@ -85,6 +85,7 @@ def main(
     interactive: bool = True,
     max_new_tokens: int = 100,
     temperature: float = 1.0,
+    n_layers: int = 61
 ) -> None:
     """
     Main function to load the model and perform interactive or batch text generation.
@@ -111,6 +112,7 @@ def main(
     torch.manual_seed(965)
     with open(config) as f:
         args = ModelArgs(**json.load(f))
+        args.n_layers = n_layers
     print(args)
     with torch.device("cuda"):
         model = Transformer(args)
@@ -180,6 +182,7 @@ if __name__ == "__main__":
     parser.add_argument("--interactive", action="store_true")
     parser.add_argument("--max-new-tokens", type=int, default=200)
     parser.add_argument("--temperature", type=float, default=0.2)
+    parser.add_argument("--n-layers", type=int, default=61)
     args = parser.parse_args()
     assert args.input_file or args.interactive
-    main(args.ckpt_path, args.config, args.input_file, args.interactive, args.max_new_tokens, args.temperature)
+    main(args.ckpt_path, args.config, args.input_file, args.interactive, args.max_new_tokens, args.temperature, args.n_layers)
